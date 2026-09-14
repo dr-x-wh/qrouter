@@ -1,12 +1,11 @@
 {
   "name": "qrouter",
   "version": "0.1.0",
-  "license": "MIT",
-  "packageManager": "yarn@4.14.1",
+  "type": "module",
+  "sideEffects": false,
   "files": [
     "dist"
   ],
-  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -15,16 +14,13 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build:js": "vite build",
-    "build:types": "tsc -p tsconfig.build.json",
-    "build": "yarn clean && yarn typecheck && yarn build:js && yarn build:types"
+    "build": "vite build && tsc -p tsconfig.build.json"
   },
   "peerDependencies": {
     "vue": "^3.5.42",
     "vue-router": "^5.3.1"
   },
   "devDependencies": {
-    "@types/node": "^26.5.1",
     "typescript": "6.0.2",
     "vite": "^8.3.0",
     "vue": "^3.5.42",
