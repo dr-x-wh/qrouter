@@ -1,0 +1,17 @@
+.yarn/
+node_modules/
+dist/
+
+.env
+.env.*
+!.env.example
+
+.pnp.*
+
+.vscode
+.idea
+
+.DS_Store
+
+*.log
+logs
