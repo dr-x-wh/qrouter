@@ -1,34 +1,6 @@
-import type {Component} from 'vue'
-import type {RouteRecordRaw, RouterOptions,} from 'vue-router'
+import type {RouteRecordRaw, RouterOptions} from "vue-router";
 
-export type DirectoryComponentLoader =
-  () => Promise<Component>
-
-export type DirectoryComponentGlob =
-  Record<string, DirectoryComponentLoader>
-
-export type DirectoryRouteMeta =
-  Partial<
-    Pick<
-      RouteRecordRaw,
-      | 'name'
-      | 'meta'
-      | 'alias'
-      | 'redirect'
-      | 'props'
-      | 'beforeEnter'
-    >
-  >
-
-export type DirectoryMetaGlob =
-  Record<string, DirectoryRouteMeta>
-
-export interface DirectoryRouterGlob {
-  components: DirectoryComponentGlob
-  metas?: DirectoryMetaGlob
-}
-
-export type CreateDirectoryRouterOptions =
-  Omit<RouterOptions, 'routes'> & {
-  glob: DirectoryRouterGlob
-}
+type DistributiveOmit<T, K extends PropertyKey, > = T extends unknown ? Omit<T, Extract<keyof T, K>> : never;
+export type DirectoryRouteMeta = DistributiveOmit<RouteRecordRaw, "path" | "children"> & {path?: never; children?: never;};
+export type DirectoryRouteGlob = Record<string, DirectoryRouteMeta>;
+export type CreateDirectoryRouterOptions = Omit<RouterOptions, "routes"> & {glob: DirectoryRouteGlob;};
