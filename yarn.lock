@@ -40,6 +40,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dr-x/qrouter@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@dr-x/qrouter@workspace:."
+  dependencies:
+    "@types/node": "npm:^26.5.1"
+    typescript: "npm:6.0.2"
+    vite: "npm:^8.3.0"
+    vue: "npm:^3.5.42"
+    vue-router: "npm:^5.3.1"
+  peerDependencies:
+    vue: ^3.5.42
+    vue-router: ^5.3.1
+  languageName: unknown
+  linkType: soft
+
 "@isaacs/fs-minipass@npm:^4.0.0":
   version: 4.0.1
   resolution: "@isaacs/fs-minipass@npm:4.0.1"
@@ -846,21 +861,6 @@ __metadata:
   checksum: 10c0/b89c2d862604f35fec795477b0c7e376feab3ba0d4f4d291c4e959567442697cf451ac557d0623c1cc38af45a78128b983410f397a10c5d3a67f76c33de4754b
   languageName: node
   linkType: hard
-
-"qrouter@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "qrouter@workspace:."
-  dependencies:
-    "@types/node": "npm:^26.5.1"
-    typescript: "npm:6.0.2"
-    vite: "npm:^8.3.0"
-    vue: "npm:^3.5.42"
-    vue-router: "npm:^5.3.1"
-  peerDependencies:
-    vue: ^3.5.42
-    vue-router: ^5.3.1
-  languageName: unknown
-  linkType: soft
 
 "quansync@npm:^0.2.11":
   version: 0.2.11
