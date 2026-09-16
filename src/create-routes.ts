@@ -31,7 +31,7 @@ export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
     if (parent) parent.children.push(entry);
     else roots.push(entry);
  }
-  return roots.map(entry => createRouteRecord(entry));
+  return createRouteRecords(roots);
 }
 
 /**
@@ -89,15 +89,24 @@ function findParentEntry(entry: RouteEntry, entryMap: ReadonlyMap<string, RouteE
 }
 
 /**
+ * 对同层路由排序并生成配置，排序值相同时保留 glob 中的原顺序。
+ */
+function createRouteRecords(entries: readonly RouteEntry[], parent?: RouteEntry): RouteRecordRaw[] {
+  return entries
+    .toSorted((a, b) => (a.meta.sort ?? 0) - (b.meta.sort ?? 0))
+    .map(entry => createRouteRecord(entry, parent));
+}
+
+/**
  * 将 RouteEntry 转换成 Vue Router RouteRecordRaw。
  */
 function createRouteRecord(entry: RouteEntry, parent?: RouteEntry): RouteRecordRaw {
   /* 子路由只需要计算相对于父 RouteRecord 多出来的目录部分。 system/meta.{js,ts} system/setting/user/meta.{js,ts} => parent: /system child: setting/user */
   const relativeSegments = parent ? entry.segments.slice(parent.segments.length) : entry.segments;
   const path = createRoutePath(relativeSegments, parent === undefined);
-  const children = entry.children.map(child => createRouteRecord(child, entry));
-  /* meta 放在前面。即使运行时传入了非法的path / children，这里也会由目录生成结果覆盖。 */
-  const {path: _path, children: _children, ...meta} = entry.meta as DirectoryRouteMeta & {path?: unknown; children?: unknown;};
+  const children = createRouteRecords(entry.children, entry);
+  /* sort 仅用于目录排序，path 和 children 由目录结构生成。 */
+  const {sort: _sort, path: _path, children: _children, ...meta} = entry.meta as DirectoryRouteMeta & {path?: unknown; children?: unknown;};
   return {...meta, path, ...(children.length > 0 ? {children} : {})} as RouteRecordRaw;
 }
 

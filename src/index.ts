@@ -11,6 +11,7 @@ export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMet
  * 方法不会修改传入对象，运行时会原样返回。
  *
  * `path` 和 `children` 由目录结构自动生成，不需要手动配置。
+ * `sort` 控制同层路由的升序排列，默认值为 0，相同值保留原顺序。
  *
  * @param meta 当前目录对应的路由配置。
  * 可配置 Vue Router 原生字段，例如：
@@ -23,6 +24,7 @@ export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMet
  *
  * export default defineRouteMeta({
  *   name: 'user',
+ *   sort: 10,
  *   component: () => import('./index'),
  * })
  *
