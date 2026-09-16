@@ -2,18 +2,18 @@ import type {RouteRecordRaw} from "vue-router";
 import type {DirectoryRouteGlob, DirectoryRouteMeta} from "./types";
 
 interface RouteEntry {
-  /* glob 原始 key。例如：./system/user/meta.ts */
+  /* glob 原始 key。例如：./system/user/meta.{js,ts} */
   source: string;
-  /* 原始目录结构。./system/user/meta.ts=>["system", "user"]注意：这里不会删除 index，因为 index 仍然参与父子目录关系判断。 */
+  /* 原始目录结构。./system/user/meta.{js,ts}=>["system", "user"]注意：这里不会删除 index，因为 index 仍然参与父子目录关系判断。 */
   segments: string[];
-  /* meta.ts 默认导出的路由信息。 */
+  /* meta.{js,ts} 默认导出的路由信息。 */
   meta: DirectoryRouteMeta;
   /* 直接子路由。 */
   children: RouteEntry[];
 }
 
 /**
- * 根据 meta.ts glob 创建 Vue Router routes。
+ * 根据 meta.{js,ts} glob 创建 Vue Router routes。
  */
 export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
   const entries = Object.entries(glob).map(([source, meta]) => createEntry(source, meta));
@@ -25,7 +25,7 @@ export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
     entryMap.set(key, entry);
  }
   const roots: RouteEntry[] = [];
-  /* 为每一个 meta.ts 找最近的 meta.ts 祖先。 */
+  /* 为每一个 meta.{js,ts} 找最近的 meta.{js,ts} 祖先。 */
   for (const entry of entries) {
     const parent = findParentEntry(entry, entryMap);
     if (parent) parent.children.push(entry);
@@ -43,18 +43,17 @@ function createEntry(source: string, meta: DirectoryRouteMeta): RouteEntry {
 
 /**
  * 从 glob key 中提取目录。
- * ./meta.ts => []
- * ./index/meta.ts => ["index"]
- * ./system/meta.ts => ["system"]
- * ./system/user/meta.ts => ["system", "user"]
+ * ./meta.{js,ts} => []
+ * ./index/meta.{js,ts} => ["index"]
+ * ./system/meta.{js,ts} => ["system"]
+ * ./system/user/meta.{js,ts} => ["system", "user"]
  */
 function parseDirectorySegments(source: string): string[] {
   const normalized = normalizeGlobKey(source);
-  if (normalized === "meta.ts") return [];
-  const suffix = "/meta.ts";
-  if (!normalized.endsWith(suffix)) throw new Error(`[vue-directory-router] Invalid route meta file: "${source}". Expected "meta.ts".`);
-  const directory = normalized.slice(0, -suffix.length);
-  return directory.split("/").filter(Boolean);
+  const match = normalized.match(/^(.*\/)?meta\.(?:js|ts)$/);
+  if (!match) throw new Error(`[vue-directory-router] Invalid route meta file: "${source}". Expected "meta.{js,ts}".`);
+  const directory = match[1]?.replace(/\/$/, '') ?? '';
+  return directory ? directory.split('/').filter(Boolean) : [];
 }
 
 /**
@@ -73,9 +72,9 @@ function createDirectoryKey(segments: readonly string[]): string {
 }
 
 /**
- * 查找距离当前路由最近的 meta.ts 祖先。
- * 例如：system/meta.ts
- * system/setting/user/meta.ts
+ * 查找距离当前路由最近的 meta.{js,ts} 祖先。
+ * 例如：system/meta.{js,ts}
+ * system/setting/user/meta.{js,ts}
  * user 路由最近的 meta 祖先是 system，
  * 因此最终生成：{path: "/system",children: [{path: "setting/user"}]}
  */
@@ -93,7 +92,7 @@ function findParentEntry(entry: RouteEntry, entryMap: ReadonlyMap<string, RouteE
  * 将 RouteEntry 转换成 Vue Router RouteRecordRaw。
  */
 function createRouteRecord(entry: RouteEntry, parent?: RouteEntry): RouteRecordRaw {
-  /* 子路由只需要计算相对于父 RouteRecord 多出来的目录部分。 system/meta.ts system/setting/user/meta.ts => parent: /system child: setting/user */
+  /* 子路由只需要计算相对于父 RouteRecord 多出来的目录部分。 system/meta.{js,ts} system/setting/user/meta.{js,ts} => parent: /system child: setting/user */
   const relativeSegments = parent ? entry.segments.slice(parent.segments.length) : entry.segments;
   const path = createRoutePath(relativeSegments, parent === undefined);
   const children = entry.children.map(child => createRouteRecord(child, entry));

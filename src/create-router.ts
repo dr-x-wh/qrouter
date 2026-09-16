@@ -3,7 +3,7 @@ import {createRoutes} from "./create-routes";
 import type {CreateDirectoryRouterOptions} from "./types";
 
 /**
- * 根据 `meta.ts` 的 glob 结果自动生成 routes，
+ * 根据 `meta.{js,ts}` 的 glob 结果自动生成 routes，
  * 并创建 Vue Router 实例。
  *
  * 除 `routes` 外，其余参数均原样传递给
@@ -29,7 +29,7 @@ import type {CreateDirectoryRouterOptions} from "./types";
  * export default createDirectoryRouter({
  *   history: createWebHistory(),
  *   glob: import.meta.glob<DirectoryRouteMeta>(
- *     './** /meta.ts',
+ *     './** /meta.{js,ts}',
  *     {
  *       base: '../view',
  *       eager: true,
@@ -53,10 +53,10 @@ import type {CreateDirectoryRouterOptions} from "./types";
  * @example
  * 目录与路径：
  *
- * view/index/meta.ts         => /
- * view/user/meta.ts          => /user
- * view/user/[id]/meta.ts     => /user/:id
- * view/system/index/meta.ts  => /system
+ * view/index/meta.{js,ts}         => /
+ * view/user/meta.{js,ts}          => /user
+ * view/user/[id]/meta.{js,ts}     => /user/:id
+ * view/system/index/meta.{js,ts}  => /system
  */
 export function createDirectoryRouter(options: CreateDirectoryRouterOptions): Router {
   const {glob, ...routerOptions} = options;
