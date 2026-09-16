@@ -2,22 +2,23 @@ import type {RouteRecordRaw} from "vue-router";
 import type {DirectoryRouteGlob, DirectoryRouteMeta} from "./types.js";
 
 interface RouteEntry {
-  /* glob 原始 key。例如：./system/user/meta.{js,ts} */
+  /* glob 原始文件路径，例如：./system/user/route.config.ts。 */
   source: string;
-  /* 原始目录结构。./system/user/meta.{js,ts}=>["system", "user"]注意：这里不会删除 index，因为 index 仍然参与父子目录关系判断。 */
+  /* 原始目录结构，例如：["system", "user"]。保留 index，以参与父子目录关系判断。 */
   segments: string[];
-  /* meta.{js,ts} 默认导出的路由信息。 */
+  /* 文件对应的路由配置。 */
   meta: DirectoryRouteMeta;
   /* 直接子路由。 */
   children: RouteEntry[];
 }
 
 /**
- * 根据 meta.{js,ts} glob 创建 Vue Router routes。
+ * 根据外部 glob 的全部条目创建 Vue Router 路由表。
+ * 文件名和扩展名由调用方决定，仅根据文件所在目录推导路径和层级。
  * 已提供的 name 必须在本次 glob 中全局唯一，未设置 name 的路由不参与校验。
  * 字符串按原值比较，Symbol 按身份比较。
  *
- * @throws 名称重复时抛出错误，包含冲突名称及两个 meta 文件路径。
+ * @throws 名称重复时抛出错误，包含冲突名称及两个配置文件路径。
  */
 export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
   const entries = Object.entries(glob).map(([source, meta]) => createEntry(source, meta));
@@ -26,7 +27,7 @@ export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
   const nameMap = new Map<NonNullable<DirectoryRouteMeta["name"]>, RouteEntry>();
   for (const entry of entries) {
     const key = createDirectoryKey(entry.segments);
-    if (entryMap.has(key)) throw new Error(`[qrouter] 同一目录只能有一个 meta 文件："${key || "/"}"。`);
+    if (entryMap.has(key)) throw new Error(`[qrouter] 同一目录只能有一个路由配置文件："${key || "/"}"。`);
     entryMap.set(key, entry);
 
     const name = entry.meta.name;
@@ -39,7 +40,7 @@ export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
     }
   }
   const roots: RouteEntry[] = [];
-  /* 为每一个 meta.{js,ts} 找最近的 meta.{js,ts} 祖先。 */
+  /* 为每条路由寻找最近的、包含配置的祖先目录。 */
   for (const entry of entries) {
     const parent = findParentEntry(entry, entryMap);
     if (parent) parent.children.push(entry);
@@ -56,19 +57,14 @@ function createEntry(source: string, meta: DirectoryRouteMeta): RouteEntry {
 }
 
 /**
- * 从 glob key 中提取目录。
- * ./meta.{js,ts} => []
- * ./index/meta.{js,ts} => ["index"]
- * ./system/meta.{js,ts} => ["system"]
- * ./system/user/meta.{js,ts} => ["system", "user"]
+ * 从 glob 文件路径中提取目录，末尾的文件名不参与路由生成。
+ * ./route.config.ts => []
+ * ./index/route.config.ts => ["index"]
+ * ./system/route.config.ts => ["system"]
+ * ./system/user/route.config.ts => ["system", "user"]
  */
 function parseDirectorySegments(source: string): string[] {
-  const segments = normalizeGlobKey(source).split("/");
-  const filename = segments.pop();
-  if (filename !== "meta.js" && filename !== "meta.ts") {
-    throw new Error(`[qrouter] 无效的 meta 文件："${source}"，文件名必须为 meta.js 或 meta.ts。`);
-  }
-  return segments.filter(Boolean);
+  return normalizeGlobKey(source).split("/").slice(0, -1).filter(Boolean);
 }
 
 /**
@@ -87,10 +83,10 @@ function createDirectoryKey(segments: readonly string[]): string {
 }
 
 /**
- * 查找距离当前路由最近的 meta.{js,ts} 祖先。
- * 例如：system/meta.{js,ts}
- * system/setting/user/meta.{js,ts}
- * user 路由最近的 meta 祖先是 system，
+ * 查找距离当前路由最近的、包含路由配置的祖先目录。
+ * 例如：system/route.config.ts
+ * system/setting/user/route.config.ts
+ * user 路由最近的已配置祖先是 system，
  * 因此最终生成：{path: "/system",children: [{path: "setting/user"}]}
  */
 function findParentEntry(entry: RouteEntry, entryMap: ReadonlyMap<string, RouteEntry>): RouteEntry | undefined {
@@ -116,7 +112,7 @@ function createRouteRecords(entries: readonly RouteEntry[], parent?: RouteEntry)
  * 将 RouteEntry 转换成 Vue Router RouteRecordRaw。
  */
 function createRouteRecord(entry: RouteEntry, parent?: RouteEntry): RouteRecordRaw {
-  /* 子路由只需要计算相对于父 RouteRecord 多出来的目录部分。 system/meta.{js,ts} system/setting/user/meta.{js,ts} => parent: /system child: setting/user */
+  /* 子路由使用相对于父路由的目录片段，例如：system 与 system/setting/user => 父路径 /system，子路径 setting/user。 */
   const relativeSegments = parent ? entry.segments.slice(parent.segments.length) : entry.segments;
   const path = createRoutePath(relativeSegments, parent === undefined);
   const children = createRouteRecords(entry.children, entry);

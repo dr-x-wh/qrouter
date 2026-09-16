@@ -7,12 +7,12 @@ export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMet
 /**
  * 定义当前目录对应的路由配置。
  *
- * 该方法主要用于为 `meta.{js,ts}` 提供 TypeScript 类型提示。
+ * 该方法为路由配置提供 TypeScript 类型提示，配置文件名称与扩展名可自定义。
  * 方法不会修改传入对象，运行时会原样返回。
  *
  * `path` 和 `children` 由目录结构自动生成，不需要手动配置。
  * `sort` 控制同层路由的升序排列，默认值为 0，相同值保留原顺序。
- * `name` 可以省略；提供时必须在同一次扫描的全部 meta 中唯一，生成路由时统一校验。
+ * `name` 可以省略；提供时必须在传入的全部配置中唯一，生成路由时统一校验。
  * 字符串按原值比较，Symbol 按身份比较。
  *
  * @param meta 当前目录对应的路由配置。
