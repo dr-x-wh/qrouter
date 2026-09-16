@@ -14,15 +14,29 @@ interface RouteEntry {
 
 /**
  * 根据 meta.{js,ts} glob 创建 Vue Router routes。
+ * 已提供的 name 必须在本次 glob 中全局唯一，未设置 name 的路由不参与校验。
+ * 字符串按原值比较，Symbol 按身份比较。
+ *
+ * @throws 名称重复时抛出错误，包含冲突名称及两个 meta 文件路径。
  */
 export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
   const entries = Object.entries(glob).map(([source, meta]) => createEntry(source, meta));
-  /* 根据完整目录路径建立索引。system/user=>RouteEntry */
+  /* 根据完整目录路径和已提供的名称建立全局索引。 */
   const entryMap = new Map<string, RouteEntry>();
+  const nameMap = new Map<NonNullable<DirectoryRouteMeta["name"]>, RouteEntry>();
   for (const entry of entries) {
     const key = createDirectoryKey(entry.segments);
     if (entryMap.has(key)) throw new Error(`[qrouter] 同一目录只能有一个 meta 文件："${key || "/"}"。`);
     entryMap.set(key, entry);
+
+    const name = entry.meta.name;
+    if (name !== undefined) {
+      const duplicate = nameMap.get(name);
+      if (duplicate) {
+        throw new Error(`[qrouter] 路由名称重复："${String(name)}"，冲突文件："${duplicate.source}" 和 "${entry.source}"。`);
+      }
+      nameMap.set(name, entry);
+    }
   }
   const roots: RouteEntry[] = [];
   /* 为每一个 meta.{js,ts} 找最近的 meta.{js,ts} 祖先。 */

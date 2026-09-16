@@ -5,6 +5,8 @@ import type {CreateDirectoryRouterOptions} from "./types.js";
 /**
  * 根据 `meta.{js,ts}` 的 glob 结果自动生成 routes，
  * 并创建 Vue Router 实例。
+ * 所有已提供的 name 必须在本次扫描结果中全局唯一；
+ * 字符串按原值比较，Symbol 按身份比较，未设置 name 的路由不参与校验。
  *
  * 除 `routes` 外，其余参数均原样传递给
  * Vue Router 的 `createRouter()`。
@@ -23,6 +25,7 @@ import type {CreateDirectoryRouterOptions} from "./types.js";
  * 例如 strict、scrollBehavior、linkActiveClass 等。
  *
  * @returns 创建完成的 Vue Router 实例。
+ * @throws 名称重复时抛出错误，包含冲突名称及两个 meta 文件路径。
  *
  * @example
  * 在 src/router/index.ts 中扫描 src/view：
