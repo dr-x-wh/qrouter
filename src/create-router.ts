@@ -1,6 +1,6 @@
 import {createRouter, type Router} from "vue-router";
-import {createRoutes} from "./create-routes";
-import type {CreateDirectoryRouterOptions} from "./types";
+import {createRoutes} from "./create-routes.js";
+import type {CreateDirectoryRouterOptions} from "./types.js";
 
 /**
  * 根据 `meta.{js,ts}` 的 glob 结果自动生成 routes，
@@ -12,7 +12,8 @@ import type {CreateDirectoryRouterOptions} from "./types";
  * @param options 路由创建参数。
  *
  * options.glob：
- * Vite `import.meta.glob()` 的扫描结果。
+ * Vite `import.meta.glob()` 的扫描结果，键相对于扫描根目录，值为默认导出。
+ * base 指定扫描根目录，eager: true 直接加载配置，import: 'default' 取得默认导出。
  *
  * options.history：
  * Vue Router 的 history，例如 `createWebHistory()`。
@@ -24,19 +25,26 @@ import type {CreateDirectoryRouterOptions} from "./types";
  * @returns 创建完成的 Vue Router 实例。
  *
  * @example
- * 基础用法：
+ * 在 src/router/index.ts 中扫描 src/view：
+ *
+ * ```ts
+ * import {createWebHistory} from 'vue-router';
+ * import {createDirectoryRouter, type DirectoryRouteMeta} from '@dr-x/qrouter';
  *
  * export default createDirectoryRouter({
  *   history: createWebHistory(),
  *   glob: import.meta.glob<DirectoryRouteMeta>(
- *     './** /meta.{js,ts}',
+ *     './**\/meta.{js,ts}',
  *     {
  *       base: '../view',
  *       eager: true,
  *       import: 'default',
  *     },
  *   ),
- * })
+ * });
+ * ```
+ *
+ * 示例中的 `\/` 是字符串的斜杠转义，等同于 `/`，可直接复制使用。
  *
  * @example
  * 透传 Vue Router 配置：

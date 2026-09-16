@@ -1,8 +1,8 @@
-import type {DirectoryRouteMeta} from "./types";
+import type {DirectoryRouteMeta} from "./types.js";
 
-export {createDirectoryRouter} from "./create-router";
-export {createRoutes} from "./create-routes";
-export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMeta} from "./types";
+export {createDirectoryRouter} from "./create-router.js";
+export {createRoutes} from "./create-routes.js";
+export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMeta} from "./types.js";
 
 /**
  * 定义当前目录对应的路由配置。
@@ -50,6 +50,6 @@ export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMet
  *   },
  * })
  */
-export function defineRouteMeta<const T extends DirectoryRouteMeta, >(meta: T): T {
+export function defineRouteMeta<const T extends DirectoryRouteMeta>(meta: T): T {
   return meta;
 }

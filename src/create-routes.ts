@@ -1,5 +1,5 @@
 import type {RouteRecordRaw} from "vue-router";
-import type {DirectoryRouteGlob, DirectoryRouteMeta} from "./types";
+import type {DirectoryRouteGlob, DirectoryRouteMeta} from "./types.js";
 
 interface RouteEntry {
   /* glob 原始 key。例如：./system/user/meta.{js,ts} */
@@ -21,16 +21,16 @@ export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
   const entryMap = new Map<string, RouteEntry>();
   for (const entry of entries) {
     const key = createDirectoryKey(entry.segments);
-    if (entryMap.has(key)) throw new Error(`[vue-directory-router] Duplicate route directory: "${key || "/"}"`);
+    if (entryMap.has(key)) throw new Error(`[qrouter] 同一目录只能有一个 meta 文件："${key || "/"}"。`);
     entryMap.set(key, entry);
- }
+  }
   const roots: RouteEntry[] = [];
   /* 为每一个 meta.{js,ts} 找最近的 meta.{js,ts} 祖先。 */
   for (const entry of entries) {
     const parent = findParentEntry(entry, entryMap);
     if (parent) parent.children.push(entry);
     else roots.push(entry);
- }
+  }
   return createRouteRecords(roots);
 }
 
@@ -49,11 +49,12 @@ function createEntry(source: string, meta: DirectoryRouteMeta): RouteEntry {
  * ./system/user/meta.{js,ts} => ["system", "user"]
  */
 function parseDirectorySegments(source: string): string[] {
-  const normalized = normalizeGlobKey(source);
-  const match = normalized.match(/^(.*\/)?meta\.(?:js|ts)$/);
-  if (!match) throw new Error(`[vue-directory-router] Invalid route meta file: "${source}". Expected "meta.{js,ts}".`);
-  const directory = match[1]?.replace(/\/$/, '') ?? '';
-  return directory ? directory.split('/').filter(Boolean) : [];
+  const segments = normalizeGlobKey(source).split("/");
+  const filename = segments.pop();
+  if (filename !== "meta.js" && filename !== "meta.ts") {
+    throw new Error(`[qrouter] 无效的 meta 文件："${source}"，文件名必须为 meta.js 或 meta.ts。`);
+  }
+  return segments.filter(Boolean);
 }
 
 /**
@@ -84,8 +85,8 @@ function findParentEntry(entry: RouteEntry, entryMap: ReadonlyMap<string, RouteE
     const parentSegments = entry.segments.slice(0, length);
     const parent = entryMap.get(createDirectoryKey(parentSegments));
     if (parent) return parent;
- }
-  return undefined
+  }
+  return undefined;
 }
 
 /**

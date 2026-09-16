@@ -14,7 +14,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "vite build && tsc -p tsconfig.build.json"
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "test": "yarn typecheck && yarn build && node --test tests/*.test.mjs"
   },
   "peerDependencies": {
     "vue": "^3.5.42",
