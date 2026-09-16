@@ -8,9 +8,9 @@
 
 ```ts
 import {createWebHistory} from 'vue-router';
-import {createDirectoryRouter, type DirectoryRouteMeta} from '@dr-x/qrouter';
+import {createDirectoryRouter, type DirectoryRoute} from '@dr-x/qrouter';
 
-const glob = import.meta.glob<DirectoryRouteMeta>('./**/route.config.ts', {
+const glob = import.meta.glob<DirectoryRoute>('./**/route.config.ts', {
   base: '../view',
   eager: true,
   import: 'default',
@@ -29,16 +29,16 @@ export default createDirectoryRouter({
 在每个需要生成路由的目录中创建一个配置文件，例如 `route.config.ts`：
 
 ```ts
-import {defineRouteMeta} from '@dr-x/qrouter';
+import {defineRoute} from '@dr-x/qrouter';
 
-export default defineRouteMeta({
+export default defineRoute({
   name: 'user',
   component: () => import('./index'),
   sort: 10,
 });
 ```
 
-`defineRouteMeta` 提供类型提示并原样返回配置。允许空配置 `{}`；组件、名称、重定向、守卫、`props`、`alias`、`meta` 等原生字段直接透传。
+`defineRoute` 提供类型提示并原样返回配置。允许空配置 `{}`；组件、名称、重定向、守卫、`props`、`alias`、`meta` 等原生字段直接透传。
 
 ## 目录规则
 

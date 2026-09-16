@@ -1,8 +1,8 @@
-import type {DirectoryRouteMeta} from "./types.js";
+import type {DirectoryRoute} from "./types.js";
 
 export {createDirectoryRouter} from "./create-router.js";
 export {createRoutes} from "./create-routes.js";
-export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMeta} from "./types.js";
+export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRoute} from "./types.js";
 
 /**
  * 定义当前目录对应的路由配置。
@@ -24,7 +24,7 @@ export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMet
  * @example
  * 普通页面：
  *
- * export default defineRouteMeta({
+ * export default defineRoute({
  *   name: 'user',
  *   sort: 10,
  *   component: () => import('./index'),
@@ -33,7 +33,7 @@ export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMet
  * @example
  * 带 meta 和 props：
  *
- * export default defineRouteMeta({
+ * export default defineRoute({
  *   name: 'user-detail',
  *   component: () => import('./index'),
  *   props: true,
@@ -46,12 +46,12 @@ export type {CreateDirectoryRouterOptions, DirectoryRouteGlob, DirectoryRouteMet
  * @example
  * 重定向：
  *
- * export default defineRouteMeta({
+ * export default defineRoute({
  *   redirect: {
  *     name: 'home',
  *   },
  * })
  */
-export function defineRouteMeta<const T extends DirectoryRouteMeta>(meta: T): T {
+export function defineRoute<const T extends DirectoryRoute>(meta: T): T {
   return meta;
 }

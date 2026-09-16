@@ -35,11 +35,11 @@ import type {CreateDirectoryRouterOptions} from "./types.js";
  *
  * ```ts
  * import {createWebHistory} from 'vue-router';
- * import {createDirectoryRouter, type DirectoryRouteMeta} from '@dr-x/qrouter';
+ * import {createDirectoryRouter, type DirectoryRoute} from '@dr-x/qrouter';
  *
  * export default createDirectoryRouter({
  *   history: createWebHistory(),
- *   glob: import.meta.glob<DirectoryRouteMeta>(
+ *   glob: import.meta.glob<DirectoryRoute>(
  *     './**\/route.config.ts',
  *     {
  *       base: '../view',

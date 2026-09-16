@@ -1,5 +1,5 @@
 import type {RouteRecordRaw} from "vue-router";
-import type {DirectoryRouteGlob, DirectoryRouteMeta} from "./types.js";
+import type {DirectoryRouteGlob, DirectoryRoute} from "./types.js";
 
 interface RouteEntry {
   /* glob 原始文件路径，例如：./system/user/route.config.ts。 */
@@ -7,7 +7,7 @@ interface RouteEntry {
   /* 原始目录结构，例如：["system", "user"]。保留 index，以参与父子目录关系判断。 */
   segments: string[];
   /* 文件对应的路由配置。 */
-  meta: DirectoryRouteMeta;
+  meta: DirectoryRoute;
   /* 直接子路由。 */
   children: RouteEntry[];
 }
@@ -24,7 +24,7 @@ export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
   const entries = Object.entries(glob).map(([source, meta]) => createEntry(source, meta));
   /* 根据完整目录路径和已提供的名称建立全局索引。 */
   const entryMap = new Map<string, RouteEntry>();
-  const nameMap = new Map<NonNullable<DirectoryRouteMeta["name"]>, RouteEntry>();
+  const nameMap = new Map<NonNullable<DirectoryRoute["name"]>, RouteEntry>();
   for (const entry of entries) {
     const key = createDirectoryKey(entry.segments);
     if (entryMap.has(key)) throw new Error(`[qrouter] 同一目录只能有一个路由配置文件："${key || "/"}"。`);
@@ -52,7 +52,7 @@ export function createRoutes(glob: DirectoryRouteGlob): RouteRecordRaw[] {
 /**
  * 创建内部 RouteEntry。
  */
-function createEntry(source: string, meta: DirectoryRouteMeta): RouteEntry {
+function createEntry(source: string, meta: DirectoryRoute): RouteEntry {
   return {source, segments: parseDirectorySegments(source), meta, children: []};
 }
 
@@ -117,7 +117,7 @@ function createRouteRecord(entry: RouteEntry, parent?: RouteEntry): RouteRecordR
   const path = createRoutePath(relativeSegments, parent === undefined);
   const children = createRouteRecords(entry.children, entry);
   /* sort 仅用于目录排序，path 和 children 由目录结构生成。 */
-  const {sort: _sort, path: _path, children: _children, ...meta} = entry.meta as DirectoryRouteMeta & {path?: unknown; children?: unknown;};
+  const {sort: _sort, path: _path, children: _children, ...meta} = entry.meta as DirectoryRoute & {path?: unknown; children?: unknown;};
   return {...meta, path, ...(children.length > 0 ? {children} : {})} as RouteRecordRaw;
 }
 
