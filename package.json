@@ -1,6 +1,6 @@
 {
   "name": "@dr-x/qrouter",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "module",
   "sideEffects": false,
   "files": [
